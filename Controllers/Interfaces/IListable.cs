@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProyectoComunidades
+namespace ProyectoComunidades.Controllers.Interfaces
 {
-    public interface IPlataforma
-    {
-        public void MostrarOpciones();
-    }
+	public interface IListable
+	{
+	}
 }

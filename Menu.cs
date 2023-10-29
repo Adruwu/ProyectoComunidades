@@ -4,87 +4,107 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ProyectoComunidades.Controllers;
+using ProyectoComunidades.Controllers._Factory_StrategyFactory;
+using ProyectoComunidades.Controllers.Checks;
 using ProyectoComunidades.Controllers.Interfaces;
+using ProyectoComunidades.Controllers.Managements;
 using ProyectoComunidades.Modelo;
-using ProyectoComunidades.Services;
 
 namespace ProyectoComunidades
 {
-    public class Menu : IMenu
-    {
-		private readonly IChecks _checks = new Checks();
-
+	public class Menu : IMenu
+	{
+		static DatabaseManagement DBInstance = new DatabaseManagement();
+		GenericList<User> userList = DBInstance.GetUsersDB();
 		CommunityManagement CMInstance = new CommunityManagement();
-        UserManagement UMInstance = new UserManagement();
+		UserManagement UMInstance = new UserManagement();
+		Checks _checks = new Checks();
+		static StrategyFactory factory = new StrategyFactory();
+		ICheckStrategy descriptionLengthChecker = factory.CreateCheckStrategy("DescriptionLength");
+		ICheckStrategy emailLengthChecker = factory.CreateCheckStrategy("EmailLength");
+		ICheckStrategy passwordLengthChecker = factory.CreateCheckStrategy("PasswordLength");
+		ICheckStrategy passwordMatchChecker = factory.CreateCheckStrategy("PasswordMatch");
+		ICheckStrategy passwordPatternChecker = factory.CreateCheckStrategy("PasswordPattern");
+		ICheckStrategy userAgeChecker = factory.CreateCheckStrategy("UserAge");
+		ICheckStrategy userEmailChecker = factory.CreateCheckStrategy("UserEmail");
+		ICheckStrategy usernameLengthChecker = factory.CreateCheckStrategy("UsernameLength");
+		ICheckStrategy usernamePatternChecker = factory.CreateCheckStrategy("UsernamePattern");
 
-        static DatabaseManagement DBInstance = new DatabaseManagement();
-		GenericList<User> userList = DBInstance.GetUsersBBDD();
+
+
 		public void MainMenu()
-        {
-            int option;
-            do
-            {
-                Console.WriteLine("\n~ 1) Register: \n" +
-                                    "~ 2) Login: \n" +
-                                    "~ 0) Salir: \n");
-                option = Convert.ToInt32(Console.ReadLine());
-                switch (option)
-                {
-                    case 1:
+		{
+			int option;
+			do
+			{
+				Console.WriteLine("\n~ 1) Register: \n" +
+									"~ 2) Login: \n" +
+									"~ 0) Salir: \n");
+				option = Convert.ToInt32(Console.ReadLine());
+				switch (option)
+				{
+					case 1:
 						Register();
-                        break;
-                    case 2:
+						break;
+					case 2:
 						Login();
-                        break;
-                    case 0:
-                        break;
-                }
-            }
-            while (option != 0);
-        }
+						break;
+					case 0:
+						break;
+				}
+			}
+			while (option != 0);
+		}
 		public void Register()
 		{
 			string username;
 			do
 			{
 				Console.WriteLine("\nUsername: ");
-			} while (!_checks.CheckUsernameLength(username = Console.ReadLine()) || !_checks.CheckUsernamePattern(username) || !_checks.CheckUserRepeated(username, userList));
+			} while (!usernameLengthChecker.Check(username = Console.ReadLine()) || !usernamePatternChecker.Check(username) || !_checks.CheckUserRepeated(username, userList));
 
 			string password;
 			do
 			{
 				Console.WriteLine("\nPassword: ");
-			} while (!_checks.CheckPasswordPattern(password = Console.ReadLine()) || !_checks.CheckPasswordLength(password));
+			} while (!passwordPatternChecker.Check(password = Console.ReadLine()) || !passwordLengthChecker.Check(password));
 
 			string repeatedPassword;
 			do
 			{
 				Console.WriteLine("\nRepeat the password: ");
-			} while (!_checks.CheckPasswordMatch(password, repeatedPassword = Console.ReadLine()));
-			
+			} while (!passwordMatchChecker.Check(password, repeatedPassword = Console.ReadLine()));
+
 			string birth;
 			do
 			{
-				Console.WriteLine("\nBirth(dd/mm/yyyy): ");
-			} while (!_checks.AgeManagement(birth = Console.ReadLine()));
-
+				Console.WriteLine("\nBirth (dd/mm/yyyy): ");
+			} while (!userAgeChecker.Check(birth = Console.ReadLine()));
+			int ageYear = _checks.GetAdultAge(birth);
+;
 			string email;
 			do
 			{
 				Console.WriteLine("\nEmail: ");
-			} while (!_checks.CheckEmailPattern(email = Console.ReadLine()) || !_checks.CheckEmailLength(email));
+			} while (!userEmailChecker.Check(email = Console.ReadLine()) || !emailLengthChecker.Check(email));
 
 			string description;
 			do
 			{
 				Console.WriteLine("\nDescription: ");
-			} while (!_checks.CheckDescriptionLength(description = Console.ReadLine()));
+			} while (!descriptionLengthChecker.Check(description = Console.ReadLine()));
 
-			// Call Add User()
+
+			UMInstance.AddUser(username, password, ageYear, email, description);
 
 		}
 		public void Login()
 		{
+			User asdasd = new User("Manuel", "Perez", 12, "asda", "aSdasd");
+			DBInstance.InsertUserDB(asdasd);
+
+			userList.ShowList();
+
 
 		}
 	}

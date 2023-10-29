@@ -10,12 +10,6 @@ namespace ProyectoComunidades.Modelo
 {
     public class User : IListable
 	{
-		public User(int id, string username, string password)
-        {
-            Id = id;
-            Username = username;
-            Password = password;
-        }
 		public User(string username, string password, int age, string email, string description)
 		{
 			Username = username;
